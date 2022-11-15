@@ -1,0 +1,7 @@
+Resolution:1920,1080
+Fps:120
+FullScreen:1
+Player_Key_Forward:Z
+Player_Key_Backward:S
+Player_Key_Left:Q
+Player_Key_Right:D
