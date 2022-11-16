@@ -16,9 +16,6 @@ def rot_center(image, angle):
     rot_sprite.get_rect().center = loc
     return rot_sprite
 
-def update(self):
-    self.rect.y += 1
-
 def KeyboardInput():
     keys = pygame.key.get_pressed()
 
@@ -35,20 +32,24 @@ def KeyboardInput():
         player.rect.y += PLAYER_SPEED
 
     if keys[pygame.K_LEFT]: 
-        tears = Tears(180) 
-        tears.rect.x -= PLAYER_SHOOT_VELOCITY
+        tears = Tears(SHOT_LEFT) 
+        #tears.rect.x -= PLAYER_SHOOT_VELOCITY
+        block_list.add(tears)
 
     if keys[pygame.K_RIGHT]:
-        tears = Tears(0)
-        tears.rect.x += PLAYER_SHOOT_VELOCITY
+        tears = Tears(SHOT_RIGHT)
+        #tears.rect.x += PLAYER_SHOOT_VELOCITY
+        block_list.add(tears)
 
     if keys[pygame.K_UP]:
-        tears = Tears(90)
-        tears.rect.y -= PLAYER_SHOOT_VELOCITY
+        tears = Tears(SHOT_UP)
+        #tears.rect.y -= PLAYER_SHOOT_VELOCITY
+        block_list.add(tears)
 
     if keys[pygame.K_DOWN]:
-        tears = Tears(270)
-        tears.rect.y += PLAYER_SHOOT_VELOCITY
+        tears = Tears(SHOT_DOWN)
+        #tears.rect.y += PLAYER_SHOOT_VELOCITY
+        block_list.add(tears)
 
 class Block(pygame.sprite.Sprite):
 
@@ -65,6 +66,10 @@ class Block(pygame.sprite.Sprite):
 
 class Tears(pygame.sprite.Sprite):
 
+    shot_range = 0
+    trajectoire = 'x'
+
+
     # Constructor. Pass in the color of the block,
     # and its x and y position
     def __init__(self, direction):
@@ -80,6 +85,24 @@ class Tears(pygame.sprite.Sprite):
         self.rect.x = player.rect.x
         self.rect.y = player.rect.y
         all_sprites_list.add(self)
+        trajectoire = direction
+        shot_range = PLAYER_SHOOT_RANGE
+
+    def update(self):
+        if (self.trajectoire == SHOT_LEFT and PLAYER_SHOOT_RANGE > 0):
+            self.rect.x -= PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+        if (self.trajectoire == SHOT_RIGHT and PLAYER_SHOOT_RANGE > 0):
+            self.rect.x += PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+        if (self.trajectoire == SHOT_UP and PLAYER_SHOOT_RANGE > 0):
+            self.rect.y -= PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+        if (self.trajectoire == SHOT_DOWN and PLAYER_SHOOT_RANGE > 0):
+            self.rect.y += PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+        if (self.shot_range < PLAYER_SHOOT_SPEED):
+            all_sprites_list.remove()
 
 class Player(pygame.sprite.Sprite):
 
@@ -212,6 +235,12 @@ PLAYER_ANGEL = 0
 
 FULLSCREEN = 0
 
+SHOT_UP = 90
+SHOT_RIGHT = 0
+SHOT_LEFT = 180
+SHOT_DOWN = 270
+
+tears = 0
 
 
 
@@ -285,8 +314,12 @@ while not done:
         for block in blocks_hit_list:
             score +=1
             print(score)
+        while (tears < len(block_list)):
+            block_list[tears].update()
+            tears += 1
             #pygame.mixer.music.load("miam.mp3")
             #pygame.mixer.music.play()
+        tears = 0
     
     all_sprites_list.draw(screen)
     # Limit to 60 frames per second
