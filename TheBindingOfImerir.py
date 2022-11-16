@@ -16,39 +16,52 @@ def rot_center(image, angle):
     rot_sprite.get_rect().center = loc
     return rot_sprite
 
-def update(self):
-    self.rect.y += 1
-
 def KeyboardInput():
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_q]:
-        player.rect.x -= PLAYER_SPEED
+        if (player.rect.x > (0 + PLAYER_SPEED)):   
+            player.rect.x -= PLAYER_SPEED
+        elif (player.rect.x > 0 and player.rect.x < PLAYER_SPEED):   
+            player.rect.x = 0
 
     if keys[pygame.K_d]:
-        player.rect.x += PLAYER_SPEED
+        if (player.rect.x < (screen_width - PLAYER_SPEED - player.image.get_width())):   
+            player.rect.x += PLAYER_SPEED
+        elif (player.rect.x < screen_width and player.rect.x > (screen_width - PLAYER_SPEED - player.image.get_width())):   
+            player.rect.x = screen_width
 
     if keys[pygame.K_z]:
-        player.rect.y -= PLAYER_SPEED
+        if (player.rect.y > (0 + PLAYER_SPEED)):   
+            player.rect.y -= PLAYER_SPEED
+        elif (player.rect.y > 0 and player.rect.y < PLAYER_SPEED):   
+            player.rect.y = 0
 
     if keys[pygame.K_s]:
-        player.rect.y += PLAYER_SPEED
+        if (player.rect.y < (screen_height - PLAYER_SPEED - player.image.get_height())):   
+            player.rect.y += PLAYER_SPEED
+        elif (player.rect.y < screen_height and player.rect.y > (screen_height - PLAYER_SPEED)):   
+            player.rect.y = screen_height + player.image.get_height()
 
     if keys[pygame.K_LEFT]: 
-        tears = Tears(180) 
-        tears.rect.x -= PLAYER_SHOOT_VELOCITY
+        tears = Tears(SHOT_LEFT) 
+        #tears.rect.x -= PLAYER_SHOOT_VELOCITY
+        tears_list.add(tears)
 
-    if keys[pygame.K_RIGHT]:
-        tears = Tears(0)
-        tears.rect.x += PLAYER_SHOOT_VELOCITY
+    elif keys[pygame.K_RIGHT]:
+        tears = Tears(SHOT_RIGHT)
+        #tears.rect.x += PLAYER_SHOOT_VELOCITY
+        tears_list.add(tears)
 
-    if keys[pygame.K_UP]:
-        tears = Tears(90)
-        tears.rect.y -= PLAYER_SHOOT_VELOCITY
+    elif keys[pygame.K_UP]:
+        tears = Tears(SHOT_UP)
+        #tears.rect.y -= PLAYER_SHOOT_VELOCITY
+        tears_list.add(tears)
 
-    if keys[pygame.K_DOWN]:
-        tears = Tears(270)
-        tears.rect.y += PLAYER_SHOOT_VELOCITY
+    elif keys[pygame.K_DOWN]:
+        tears = Tears(SHOT_DOWN)
+        #tears.rect.y += PLAYER_SHOOT_VELOCITY
+        tears_list.add(tears)
 
 class Block(pygame.sprite.Sprite):
 
@@ -65,6 +78,10 @@ class Block(pygame.sprite.Sprite):
 
 class Tears(pygame.sprite.Sprite):
 
+    shot_range = 0
+    trajectoire = 0
+
+
     # Constructor. Pass in the color of the block,
     # and its x and y position
     def __init__(self, direction):
@@ -80,6 +97,29 @@ class Tears(pygame.sprite.Sprite):
         self.rect.x = player.rect.x
         self.rect.y = player.rect.y
         all_sprites_list.add(self)
+        self.trajectoire = direction
+        self.shot_range = PLAYER_SHOOT_RANGE
+
+    def update(self):
+        if (self.trajectoire == SHOT_LEFT and self.shot_range > 0):
+            self.rect.x -= PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+            
+        if (self.trajectoire == SHOT_RIGHT and self.shot_range > 0):
+            self.rect.x += PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+            
+        if (self.trajectoire == SHOT_UP and self.shot_range > 0):
+            self.rect.y -= PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+            
+        if (self.trajectoire == SHOT_DOWN and self.shot_range > 0):
+            self.rect.y += PLAYER_SHOOT_SPEED
+            self.shot_range -= PLAYER_SHOOT_SPEED
+            
+        if (self.shot_range < PLAYER_SHOOT_SPEED):
+            self.kill()
+            
 
 class Player(pygame.sprite.Sprite):
 
@@ -184,19 +224,6 @@ def main_menu():
 
         pygame.display.update()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 isaac_pp="Sprite/isaac.png"
 nino_pp="Sprite/nino.png"
 
@@ -204,18 +231,18 @@ PLAYER_HEALTH = 30
 PLAYER_DAMAGE = 5
 PLAYER_SPEED = 5
 PLAYER_SHOOT_SPEED = 5
-PLAYER_SHOOT_RANGE = 20
-PLAYER_SHOOT_VELOCITY = 5
+PLAYER_SHOOT_RANGE = 1000
+PLAYER_SHOOT_VELOCITY = 10
 PLAYER_LUCK = 5
 PLAYER_DEVIL = 0
 PLAYER_ANGEL = 0
 
 FULLSCREEN = 0
 
-
-
-
-
+SHOT_UP = 90
+SHOT_RIGHT = 0
+SHOT_LEFT = 180
+SHOT_DOWN = 270
 
 
 pygame.init()
@@ -243,6 +270,7 @@ BG = pygame.image.load("assets/Background.png")
 
 #debut jeux 
 block_list = pygame.sprite.Group()
+tears_list = pygame.sprite.Group()
 all_sprites_list = pygame.sprite.Group()
 
 ##########################################################
@@ -278,13 +306,14 @@ while not done:
  
     # Clear the screen
     screen.fill(WHITE)
- 
     KeyboardInput()
-    if(pygame.sprite.Group.has(Tears) == True):
-        blocks_hit_list = pygame.sprite.spritecollide(tears, block_list, True)
-        for block in blocks_hit_list:
-            score +=1
-            print(score)
+    #if(tears_list.has(Tears) == True):
+        #blocks_hit_list = pygame.sprite.spritecollide(tears, block_list, True)
+        
+        #for block in blocks_hit_list:
+        #    score +=1
+        #    print(score)
+    tears_list.update()
             #pygame.mixer.music.load("miam.mp3")
             #pygame.mixer.music.play()
     
