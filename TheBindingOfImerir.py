@@ -71,7 +71,7 @@ class Tears(pygame.sprite.Sprite):
         # Call the parent class (Sprite) constructor
         super().__init__()
         # Load the image
-        self.image = pygame.image.load("tears.png").convert_alpha()
+        self.image = pygame.image.load("Sprite/tears.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (PLAYER_DAMAGE * 10, PLAYER_DAMAGE * 10))
         rot_center(self.image, direction)
         # Set our transparent color
@@ -97,33 +97,9 @@ class Player(pygame.sprite.Sprite):
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
-def play():
-    while True:
-        PLAY_MOUSE_POS = pygame.mouse.get_pos()
-
-        screen.fill("black")
-
-        PLAY_TEXT = get_font(45).render("This is the PLAY screen.", True, "White")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(screen_width/2, 260))
-        screen.blit(PLAY_TEXT, PLAY_RECT)
-
-        PLAY_BACK = Button(image=None, pos=(screen_width/2, 460), 
-                            text_input="BACK", font=get_font(75), base_color="White", hovering_color="Green")
-
-        PLAY_BACK.changeColor(PLAY_MOUSE_POS)
-        PLAY_BACK.update(screen)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
-                    main_menu()
-
-        pygame.display.update()
-    
 def options():
+    global screen_height
+    global screen_width
     while True:
         OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
 
@@ -133,19 +109,41 @@ def options():
         OPTIONS_RECT = OPTIONS_TEXT.get_rect(center=(screen_width/2, 260))
         screen.blit(OPTIONS_TEXT, OPTIONS_RECT)
 
+
+        FULLSCREEN_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(screen_width/2, screen_height/2 - 150), 
+            text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+        OPTIONS_BUTTON = Button(image=pygame.image.load("assets/Options Rect.png"), pos=(screen_width/2, screen_height/2),
+            text_input="OPTIONS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(screen_width/2, screen_height/2 + 150), 
+            text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
         OPTIONS_BACK = Button(image=None, pos=(screen_width/2, 460), 
-                            text_input="BACK", font=get_font(75), base_color="Black", hovering_color="Green")
+            text_input="BACK", font=get_font(75), base_color="Black", hovering_color="Green")
 
         OPTIONS_BACK.changeColor(OPTIONS_MOUSE_POS)
         OPTIONS_BACK.update(screen)
+
+        for button in [FULLSCREEN_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
+            button.changeColor(OPTIONS_MOUSE_POS)
+            button.update(screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if FULLSCREEN_BUTTON.checkForInput(OPTIONS_MOUSE_POS):
+                    screen_width = 1920
+                    screen_height = 1080
+                    pygame.display.set_mode((screen_width, screen_height))
+
+                    pygame.display.toggle_fullscreen()
+                if OPTIONS_BUTTON.checkForInput(OPTIONS_MOUSE_POS):
+                    print("test")
+                if QUIT_BUTTON.checkForInput(OPTIONS_MOUSE_POS):
+                    print("test")
                 if OPTIONS_BACK.checkForInput(OPTIONS_MOUSE_POS):
-                    main_menu()
+                    return 0
+                    #main_menu()
 
         pygame.display.update()
 
@@ -177,10 +175,10 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    play()
-                if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    return 0
+                elif OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
                     options()
-                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                elif QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
 
@@ -225,8 +223,8 @@ pygame.mixer.init()
 
 
 # Set the height and width of the screen
-screen_width = 1920
-screen_height = 1080
+screen_width = 1080
+screen_height = 720
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Menu")
@@ -240,6 +238,8 @@ if(FULLSCREEN == 1):
 # The list is managed by a class called 'Group.'
 
 main_menu()
+
+BG = pygame.image.load("assets/Background.png")
 
 #debut jeux 
 block_list = pygame.sprite.Group()
